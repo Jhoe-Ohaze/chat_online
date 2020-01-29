@@ -15,7 +15,7 @@ class _HomePageState extends State<HomePage>
     Firestore.instance.collection('messages').add(
     {
       'text': text,
-
+      'date': DateTime.now().toUtc(),
     });
   }
   
