@@ -1,4 +1,5 @@
 import 'package:chat_online/ui/text_composer.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget
@@ -9,6 +10,15 @@ class HomePage extends StatefulWidget
 
 class _HomePageState extends State<HomePage>
 {
+  void _sendMessage(String text)
+  {
+    Firestore.instance.collection('messages').add(
+    {
+      'text': text,
+
+    });
+  }
+  
   @override
   Widget build(BuildContext context)
   {
@@ -20,7 +30,13 @@ class _HomePageState extends State<HomePage>
         elevation: 0,
         backgroundColor: Colors.blue,
       ),
-      body: TextComposer(),
+      body: TextComposer
+      (
+        (text)
+        {
+          print(text);
+        }
+      ),
     );
   }
 }
