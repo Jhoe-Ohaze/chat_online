@@ -18,10 +18,10 @@ class MyApp extends StatelessWidget
       debugShowCheckedModeBanner: false,
       theme: ThemeData
       (
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.red,
         iconTheme: IconThemeData
         (
-          color: Colors.blue,
+          color: Colors.red,
         )
       ),
       home: HomePage(),
