@@ -38,13 +38,31 @@ class ChatMessage extends StatelessWidget
                 children: <Widget>
                 [
                   data['imgUrl'] != null ?
-                    Image.network
+                    Stack
                     (
-                      data['imgUrl'],
-                      width: boxSize,
-                      height: boxSize,
-                      fit: BoxFit.cover,
-                    ) :
+                      children: <Widget>
+                      [
+                        Container
+                        (
+                          color: Colors.grey,
+                          height: boxSize,
+                          width: boxSize,
+                        ),
+                        Container
+                        (
+                          margin: EdgeInsets.fromLTRB(boxSize/2.5, boxSize/2.5, 0, 0),
+                          child: CircularProgressIndicator(),
+                        ),
+                        Image.network
+                        (
+                          data['imgUrl'],
+                          width: boxSize,
+                          height: boxSize,
+                          fit: BoxFit.cover,
+                        )
+                      ]
+                    )
+                    :
                     Text
                     (
                       data['text'],

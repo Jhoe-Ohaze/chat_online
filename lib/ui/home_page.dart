@@ -33,13 +33,13 @@ class _HomePageState extends State<HomePage>
 
   Future<FirebaseUser> _getUser() async
   {
-    if(_currentUser != null) return _currentUser;
-    try
-    {
-      final GoogleSignInAccount googleSignInAccount =
-        await googleSignIn.signIn();
-      final GoogleSignInAuthentication googleSignInAuthentication =
-        await googleSignInAccount.authentication;
+      if(_currentUser != null) return _currentUser;
+      try
+      {
+        final GoogleSignInAccount googleSignInAccount =
+            await googleSignIn.signIn();
+        final GoogleSignInAuthentication googleSignInAuthentication =
+            await googleSignInAccount.authentication;
 
       final AuthCredential authCredential  = GoogleAuthProvider.getCredential
       (
@@ -48,7 +48,7 @@ class _HomePageState extends State<HomePage>
       );
 
       final AuthResult authResult =
-        await FirebaseAuth.instance.signInWithCredential(authCredential);
+          await FirebaseAuth.instance.signInWithCredential(authCredential);
 
       final FirebaseUser user = authResult.user;
       return user;
@@ -63,12 +63,12 @@ class _HomePageState extends State<HomePage>
   {
     final FirebaseUser user = await _getUser();
 
-    if(user == null)
+    if (user == null)
     {
       _scaffoldKey.currentState.showSnackBar
-      (
-        SnackBar
         (
+        SnackBar
+          (
           content: Text('Não foi possível fazer o Login. Tente novamente!'),
           backgroundColor: Colors.red,
         ),
@@ -82,17 +82,23 @@ class _HomePageState extends State<HomePage>
       "senderPhotoUrl": user.photoUrl,
     };
 
-    if(imgFile != null)
-    {
+    if (imgFile != null) {
       StorageUploadTask task = FirebaseStorage.instance.ref().child(
-          DateTime.now().millisecondsSinceEpoch.toString()).putFile(imgFile);
+          DateTime
+              .now()
+              .microsecondsSinceEpoch
+              .toString()).putFile(imgFile);
       StorageTaskSnapshot taskSnapshot = await task.onComplete;
       String url = await taskSnapshot.ref.getDownloadURL();
       data['imgUrl'] = url;
     }
 
-    if(text != null) data['text'] = text;
-    Firestore.instance.collection('messages').add(data);
+    if (text != null) data['text'] = text;
+    Firestore.instance.collection('messages').document(DateTime
+        .now()
+        .microsecondsSinceEpoch
+        .toString()).setData(data);
+
   }
   
   @override
@@ -100,6 +106,7 @@ class _HomePageState extends State<HomePage>
   {
     return Scaffold
     (
+      key: _scaffoldKey,
       appBar: AppBar
       (
         title: Text("Chat online", textAlign: TextAlign.center, style: TextStyle(color: Colors.white),),
@@ -113,11 +120,16 @@ class _HomePageState extends State<HomePage>
                 icon: Icon(Icons.exit_to_app),
                 onPressed: ()
                 {
-                  FirebaseAuth.instance.signOut();
-                  _scaffoldKey.currentState.showSnackBar
-                  (
-                    SnackBar(content: Text('Você saiu com sucesso!'),)
-                  );
+                  setState(()
+                  {
+                    FirebaseAuth.instance.signOut();
+                    googleSignIn.signOut();
+                    _currentUser = null;
+                    _scaffoldKey.currentState.showSnackBar
+                    (
+                      SnackBar(content: Text('Você saiu com sucesso!'),)
+                    );
+                  });
                 },
               ):
               Container(),
@@ -134,10 +146,26 @@ class _HomePageState extends State<HomePage>
               stream: Firestore.instance.collection('messages').snapshots(),
               builder: (context, snapshot)
               {
+                if(_currentUser == null) return Center
+                (
+                  child: RaisedButton
+                  (
+                    child: Text("Log in"),
+                    onPressed: () async
+                    {
+                      final FirebaseUser user = await _getUser();
+                      setState(()
+                      {
+                        _currentUser = user;
+                      });
+                    },
+                  ),
+                );
                 switch(snapshot.connectionState)
                 {
                   case ConnectionState.none:
                   case ConnectionState.waiting:
+                    _getUser();
                     return Center
                     (
                       child: CircularProgressIndicator(),
