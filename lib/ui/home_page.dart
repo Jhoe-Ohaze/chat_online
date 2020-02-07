@@ -19,6 +19,7 @@ class _HomePageState extends State<HomePage>
   final GoogleSignIn googleSignIn = GoogleSignIn();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   FirebaseUser _currentUser;
+  bool _isLoading = false;
 
   @override
   void initState()
@@ -33,13 +34,13 @@ class _HomePageState extends State<HomePage>
 
   Future<FirebaseUser> _getUser() async
   {
-      if(_currentUser != null) return _currentUser;
-      try
-      {
-        final GoogleSignInAccount googleSignInAccount =
-            await googleSignIn.signIn();
-        final GoogleSignInAuthentication googleSignInAuthentication =
-            await googleSignInAccount.authentication;
+    if(_currentUser != null) return _currentUser;
+    try
+    {
+      final GoogleSignInAccount googleSignInAccount =
+          await googleSignIn.signIn();
+      final GoogleSignInAuthentication googleSignInAuthentication =
+          await googleSignInAccount.authentication;
 
       final AuthCredential authCredential  = GoogleAuthProvider.getCredential
       (
@@ -82,22 +83,27 @@ class _HomePageState extends State<HomePage>
       "senderPhotoUrl": user.photoUrl,
     };
 
-    if (imgFile != null) {
+    if (imgFile != null)
+    {
       StorageUploadTask task = FirebaseStorage.instance.ref().child(
           DateTime
               .now()
               .microsecondsSinceEpoch
               .toString()).putFile(imgFile);
+
+      setState((){_isLoading = true;});
       StorageTaskSnapshot taskSnapshot = await task.onComplete;
       String url = await taskSnapshot.ref.getDownloadURL();
       data['imgUrl'] = url;
+      setState((){_isLoading = false;});
     }
 
     if (text != null) data['text'] = text;
-    Firestore.instance.collection('messages').document(DateTime
-        .now()
-        .microsecondsSinceEpoch
-        .toString()).setData(data);
+    Firestore.instance.collection('messages').document(
+        DateTime
+            .now()
+            .microsecondsSinceEpoch
+            .toString()).setData(data);
 
   }
   
@@ -185,6 +191,7 @@ class _HomePageState extends State<HomePage>
               },
             ),
           ),
+          _isLoading ? LinearProgressIndicator():Container(),
           TextComposer(_sendMessage),
         ]
       ),

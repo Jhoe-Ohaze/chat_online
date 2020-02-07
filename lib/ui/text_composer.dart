@@ -76,7 +76,7 @@ class _TextComposerState extends State<TextComposer>
               widget.sendMessage(text : _controller.text);
               _reset();
             } : null,
-          )
+          ),
 
         ],
       ),
